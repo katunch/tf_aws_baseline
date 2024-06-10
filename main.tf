@@ -86,18 +86,20 @@ resource "aws_route_table_association" "private" {
 resource "aws_security_group" "vpc-access" {
   provider    = aws.default
   name        = "vpc-access"
-  description = "allows all traffic within the VPC"
+  description = "allows all traffic within the VPC and from the VPC to the internet"
   vpc_id      = data.aws_vpc.default.id
   tags = {
     Terraform-Project = "baseline"
   }
   ingress {
+    description = "allow traffic within the VPC"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = [data.aws_vpc.default.cidr_block]
   }
   egress {
+    description = "allow traffic from the VPC to the internet"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -180,18 +182,21 @@ resource "aws_security_group" "alb" {
     Terraform-Project = "baseline"
   }
   ingress {
+    description = "allow traffic from the internet to the ALB on port 80"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
+    description = "allow traffic from the internet to the ALB on port 443"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
+    description = "allow traffic from the ALB to the VPC"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -200,12 +205,13 @@ resource "aws_security_group" "alb" {
 }
 
 resource "aws_lb" "default" {
-  provider           = aws.default
-  name               = "default"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb.id]
-  subnets            = data.aws_subnets.default.ids
+  provider                   = aws.default
+  name                       = "default"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.alb.id]
+  subnets                    = data.aws_subnets.default.ids
+  drop_invalid_header_fields = true
   tags = {
     Terraform-Project = "baseline"
   }
@@ -231,7 +237,7 @@ resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.default.arn
   port              = "443"
   protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = aws_acm_certificate.default.arn
   default_action {
     type = "redirect"
@@ -242,5 +248,4 @@ resource "aws_lb_listener" "https" {
       status_code = "HTTP_301"
     }
   }
-
 }
