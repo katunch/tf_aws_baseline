@@ -108,7 +108,7 @@ resource "aws_security_group" "vpc-access" {
 }
 
 ## Route 53 and Certificate Manager
-resource "aws_route53_zone" "default" {
+data "aws_route53_zone" "default" {
   provider = aws.default
   name     = var.hosted_zone_name
 }
