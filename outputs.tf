@@ -1,10 +1,10 @@
 output "name_servers" {
-  value       = aws_route53_zone.default.name_servers
+  value       = data.aws_route53_zone.default.name_servers
   description = "The name servers for the created hosted zone"
 }
 
 output "route53_zone_id" {
-  value       = aws_route53_zone.default.zone_id
+  value       = data.aws_route53_zone.default.zone_id
   description = "The ID of the created hosted zone"
 }
 

@@ -137,7 +137,7 @@ resource "aws_route53_record" "acm_validation" {
     }
   }
   allow_overwrite = true
-  zone_id         = aws_route53_zone.default.zone_id
+  zone_id         = data.aws_route53_zone.default.zone_id
   name            = each.value.name
   type            = each.value.type
   records         = [each.value.record]
@@ -154,7 +154,7 @@ resource "aws_route53_record" "acm_validation-us-east-1" {
     }
   }
   allow_overwrite = true
-  zone_id         = aws_route53_zone.default.zone_id
+  zone_id         = data.aws_route53_zone.default.zone_id
   name            = each.value.name
   type            = each.value.type
   records         = [each.value.record]
