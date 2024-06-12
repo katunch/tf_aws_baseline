@@ -1,3 +1,30 @@
+# tf_aws_baseline
+![Overview](./docs/overview.jpg)
+The `tf_aws_baseline` repository provides Terraform scripts to set up a baseline AWS account. It configures essential infrastructure including:
+
+	•	ACM Certificates: For secure connections.
+	•	Elastic IP: For NAT Gateway.
+	•	Load Balancer: With HTTP to HTTPS redirection.
+	•	NAT Gateway: For outbound internet traffic.
+	•	Route53 Records: For SSL certificate validation.
+	•	Security Groups: For managing access control.
+	•	VPC and Subnets: For network segmentation.
+
+Inputs:
+
+	•	Hosted Zone Name: FQDN for the hosted zone
+	•	Route53 Hosted Zone ID: The ID of the hosted zone to create the record in.
+
+Outputs:
+
+	•	Various ARNs, IDs, and DNS names for the configured resources.
+
+## Security considerations
+This Terraform was validated using [Trivy](https://aquasecurity.github.io/trivy/v0.52/). You'll find the report in [SECURITY](./SECURITY). 
+
+- It's intended to publicly expose the Application Load Balancer to provide services.
+- It's intended that workloads in the VPC are allowed to consume services outside the VPC.
+
 ## Requirements
 
 | Name | Version |
