@@ -14,6 +14,65 @@ data "aws_vpc" "default" {
   default  = true
 }
 
+## secure default security group to disallow external outbound traffic. keep the traffic vpc internal
+resource "aws_default_security_group" "default" {
+  provider = aws.default
+  vpc_id   = data.aws_vpc.default.id
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = [data.aws_vpc.default.cidr_block]
+  }
+
+  ingress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = [data.aws_vpc.default.cidr_block]
+  }
+}
+
+## secure the Network ACL. only allow inbound traffic from HTTPS and VPC. Outbound traffic is allowed to 0.0.0.0/0
+data "aws_network_acls" "default" {
+  vpc_id = data.aws_vpc.default.id
+}
+resource "aws_default_network_acl" "default" {
+  provider               = aws.default
+  default_network_acl_id = data.aws_network_acls.default.ids[0]
+
+  dynamic "ingress" {
+    for_each = var.acl_allow_ingress_tcp_ports
+    content {
+      protocol   = "tcp"
+      rule_no    = ingress.key + 10
+      action     = "allow"
+      cidr_block = "0.0.0.0/0"
+      from_port  = ingress.value
+      to_port    = ingress.value
+    }
+  }
+
+  ingress {
+    protocol   = "-1"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = data.aws_vpc.default.cidr_block
+    from_port  = 0
+    to_port    = 0
+  }
+
+  egress {
+    protocol   = "-1"
+    rule_no    = 10
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+}
+
 data "aws_availability_zones" "available" {
   provider = aws.default
   state    = "available"
